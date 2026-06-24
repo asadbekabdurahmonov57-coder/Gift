@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Omad Barabani</title>
+    <!-- 🚀 Telegram WebApp SDK Scripti -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: #121225; color: #fff; display: flex; flex-direction: column; align-items: center;
+            margin: 0; padding: 15px; min-height: 100vh; box-sizing: border-box;
+            -webkit-user-select: none; user-select: none;
+        }
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, #1e1e38 0%, #121225 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; transition: opacity 0.5s ease;
+        }
+        .teddy-loader { font-size: 80px; animation: pulseTeddy 1.5s infinite ease-in-out; }
+        @keyframes pulseTeddy { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        
+        .header-panel {
+            width: 100%; max-width: 420px; display: flex; justify-content: space-between; align-items: center;
+            background: #1e1e38; padding: 12px 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-bottom: 15px; box-sizing: border-box;
+        }
+        .balance-box { font-size: 18px; font-weight: bold; color: #00d2ff; }
+        .menu-buttons { display: flex; gap: 10px; width: 100%; max-width: 420px; margin-bottom: 15px; }
+        .menu-btn {
+            flex: 1; background: #2a2a4a; border: 1px solid #3a3a6a; color: #fff;
+            padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;
+        }
+        .cases-section { width: 100%; max-width: 420px; background: #1e1e38; border-radius: 12px; padding: 12px; margin-bottom: 15px; box-sizing: border-box; }
+        .cases-section h3 { margin: 0 0 10px 0; color: #ffcc00; font-size: 15px; }
+        .cases-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .case-card { background: #2a2a4a; border: 2px solid #3a3a6a; border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .case-card.active { border-color: #00d2ff; background: #223a5e; }
+        .case-card .icon { font-size: 26px; display: block; margin-bottom: 3px; }
+        .case-card .name { font-size: 13px; font-weight: bold; display: block; }
+        .case-card .price { font-size: 12px; color: #00ffcc; margin-top: 3px; display: block; }
+        .case-card .timer { font-size: 11px; color: #ff4444; font-weight: bold; }
+        
+        .wheel-section { display: flex; flex-direction: column; align-items: center; margin-bottom: 15px; }
+        .wheel-container { position: relative; width: 280px; height: 280px; }
+        .pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 22px solid #ff0055; z-index: 10; }
+        canvas { border-radius: 50%; box-shadow: 0 0 20px rgba(0, 210, 255, 0.3); transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99); }
+        .spin-btn { margin-top: 15px; padding: 12px 40px; font-size: 16px; font-weight: bold; color: #fff; background: linear-gradient(45deg, #00d2ff, #0066ff); border: none; border-radius: 25px; cursor: pointer; min-width: 180px; text-align: center; }
+        .spin-btn:disabled { background: #444; box-shadow: none; cursor: not-allowed; }
+        #result { margin-top: 10px; font-size: 16px; font-weight: bold; min-height: 24px; text-align: center; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 200; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: #1e1e38; width: 100%; max-width: 380px; border-radius: 15px; padding: 20px; box-sizing: border-box; border: 1px solid #3a3a6a; position: relative; }
+        .close-modal { position: absolute; top: 12px; right: 15px; font-size: 22px; cursor: pointer; color: #aaa; }
+        .modal h3 { margin-top: 0; color: #ffcc00; font-size: 18px; border-bottom: 2px solid #2a2a4a; padding-bottom: 8px; }
+        .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .inventory-item { background: #2a2a4a; border-radius: 8px; padding: 10px; text-align: center; position: relative; border: 1px solid #3a3a6a; }
+        .inventory-item .icon { font-size: 32px; display: block; }
+        .inventory-item .count { position: absolute; top: 4px; right: 6px; background: #ff0055; color: white; font-size: 10px; font-weight: bold; padding: 1px 5px; border-radius: 10px; }
+        .inventory-item .name { font-size: 11px; color: #ccc; }
+        .profile-group { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .ref-link-box { background: #121225; padding: 8px 12px; border-radius: 6px; font-size: 11px; color: #00d2ff; word-break: break-all; border: 1px dashed #3a3a6a; text-align: center;}
+        .share-btn { background: #0088cc; color: #fff; border: none; padding: 10px; font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        .referrals-list { max-height: 120px; overflow-y: auto; background: #121225; border-radius: 6px; padding: 5px; margin-top: 5px; }
+        .ref-user { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 8px; border-bottom: 1px solid #1e1e38; }
+        .ref-user .bonus { color: #00ffcc; }
+
+        /* 🔔 Majburiy obuna modal dizayni */
+        .sub-btn { background: #ff0055; color: #fff; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; text-align: center; text-decoration: none; display: block; margin-top: 15px; }
+        .check-btn { background: #00ffcc; color: #121225; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; text-align: center; display: block; width: 100%; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- Kirish Ekran (Splash) -->
+    <div id="splash-screen">
+        <div class="teddy-loader">🧸</div>
+        <h3 style="color: #ffcc00; font-family: monospace;">YUKLANMOQDA...</h3>
+    </div>
+
+    <!-- Asosiy Panel -->
+    <div class="header-panel">
+        <div>💰 Balans:</div>
+        <div class="balance-box" id="tonBalance">0.000 TON</div>
+    </div>
+
+    <div class="menu-buttons">
+        <button class="menu-btn" onclick="openModal('inventoryModal')">📦 Inventar</button>
+        <button class="menu-btn" onclick="openModal('profileModal')">👤 Profil / Ref</button>
+    </div>
+
+    <!-- Keyslar bo'limi -->
+    <div class="cases-section">
+        <h3>🧰 Keysni tanlang:</h3>
+        <div class="cases-grid">
+            <div class="case-card active" id="case-daily" onclick="selectCase('daily')">
+                <span class="icon">🎁</span>
+                <span class="name">Kunlik Keys</span>
+                <span class="price" id="daily-status">TEKIN</span>
+            </div>
+            <div class="case-card" id="case-cheap" onclick="selectCase('cheap')">
+                <span class="icon">📦</span>
+                <span class="name">Arzon Keys</span>
+                <span class="price">0.10 TON</span>
+            </div>
+            <div class="case-card" id="case-medium" onclick="selectCase('medium')">
+                <span class="icon">💼</span>
+                <span class="name">O'rta Keys</span>
+                <span class="price">0.50 TON</span>
+            </div>
+            <div class="case-card" id="case-premium" onclick="selectCase('premium')">
+                <span class="icon">👑</span>
+                <span class="name">Premium Keys</span>
+                <span class="price">2.00 TON</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ruletka qismi -->
+    <div class="wheel-section">
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <canvas id="wheel" width="280" height="280"></canvas>
+        </div>
+        <button class="spin-btn" id="spinBtn" onclick="spinWheel()">OCHISH (TEKIN)</button>
+        <div id="result"></div>
+    </div>
+
+    <!-- INVENTAR MODAL -->
+    <div class="modal" id="inventoryModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('inventoryModal')">&times;</span>
+            <h3>📦 Mening Inventarim</h3>
+            <div class="inventory-grid">
+                <div class="inventory-item">
+                    <span class="count" id="giftCount">0</span>
+                    <span class="icon">🧸</span>
+                    <span class="name">Ayiqchalar</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFIL MODAL -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('profileModal')">&times;</span>
+            <h3>👤 Profil va Referallar</h3>
+            <div class="profile-group">
+                <div style="font-size: 13px;">Ism: <span id="profName" style="font-weight: bold; color: #ffcc00;">Mehmon</span></div>
+                <div style="font-size: 13px;">Telegram ID: <span id="profId" style="color:#00d2ff;">0000000</span></div>
+                <hr style="border: 0; border-top: 1px solid #3a3a6a; margin: 10px 0;">
+                <div style="font-size: 12px; color: #ccc;">Sizning taklif havolangiz:</div>
+                <div class="ref-link-box" id="refLink">Yaratilmoqda...</div>
+                <button class="share-btn" onclick="shareReferral()">Do'stlarni taklif qilish 🚀</button>
+                
+                <div style="font-size: 13px; color: #ffcc00; margin-top: 10px; font-weight: bold;">
+                    Taklif qilinganlar (<span id="refCount">0</span>):
+                </div>
+                <div class="referrals-list" id="referralsList">
+                    <div style="color:#aaa; font-size:11px; text-align:center; padding:10px;" id="noRefText">Hozircha hech kim yo'q</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔔 MAJBURIY OBUNA MODALI -->
+    <div class="modal" id="subscribeModal">
+        <div class="modal-content" style="text-align: center;">
+            <h3 style="color: #ffcc00; border: none;">Diqqat! Obuna majburiy 🔔</h3>
+            <p style="font-size: 13px; color: #ccc; line-height: 1.6;">
+                Tekin kunlik keysni ochish uchun homiy kanalimizga a'zo bo'lishingiz shart. Kanalda qimmatbaho sovg'alar va yangiliklar e'lon qilib boriladi!
+            </p>
+            <!-- Soddalashtirilgan va ochiladigan havola -->
+            <a href="https://t.me/freedom_gifts_channel" target="_blank" class="sub-btn" onclick="redirectToChannel()">Kanalga a'zo bo'lish 📢</a>
+            <button class="check-btn" onclick="checkSubscription()">Obunani tekshirish  ✅</button>
+        </div>
+    </div>
+
+    <script>
+        // Telegram API obyekti
+        let tg = null;
+        if (window.Telegram && window.Telegram.WebApp) {
+            tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+        }
+
+        let tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : { id: 1234567, first_name: "Mehmon" };
+        let userId = tgUser.id;
+        let userName = tgUser.first_name;
+
+        // 🎯 TOZA 0 DAN BOSHLACH
+        if (!localStorage.getItem('wheel_final_zero_v3')) {
+            localStorage.setItem('case_ton_balance', '0.000'); 
+            localStorage.setItem('case_gift_count', '0');
+            localStorage.setItem('last_daily_claim', '0');
+            localStorage.setItem('my_referrals', JSON.stringify([]));
+            localStorage.setItem('is_subscribed_gifts', 'false'); // Obuna holati boshida false
+            localStorage.setItem('wheel_final_zero_v3', 'true');
+        }
+
+        let account = {
+            balance: parseFloat(localStorage.getItem('case_ton_balance')) || 0.0,
+            gifts: parseInt(localStorage.getItem('case_gift_count')) || 0,
+            lastDailyClaim: parseInt(localStorage.getItem('last_daily_claim')) || 0,
+            referrals: JSON.parse(localStorage.getItem('my_referrals')) || []
+        };
+
+        // --- Dinamik Referal Tizimi (Har bir user uchun alohida) ---
+        let startParam = (tg && tg.initDataUnsafe) ? tg.initDataUnsafe.start_param : null;
+        if (startParam && startParam.startsWith('ref_')) {
+            let inviterId = startParam.replace('ref_', '');
+            if (!localStorage.getItem('referral_bonus_processed') && inviterId !== userId.toString()) {
+                account.balance += 0.10; 
+                account.referrals.push({ name: "Taklif qilgan do'st (ID: " + inviterId + ")", bonus: "+0.10 TON" });
+                localStorage.setItem('case_ton_balance', account.balance);
+                localStorage.setItem('my_referrals', JSON.stringify(account.referrals));
+                localStorage.setItem('referral_bonus_processed', 'true');
+            }
+        }
+
+        const casesConfig = {
+            daily: { price: 0, probabilities: { gift: 25, ton3: 5, ton2: 10, ton1: 30 } },
+            cheap: { price: 0.1, probabilities: { gift: 10, ton3: 5, ton2: 15, ton1: 40 } },
+            medium: { price: 0.5, probabilities: { gift: 30, ton3: 15, ton2: 25, ton1: 20 } },
+            premium: { price: 2.0, probabilities: { gift: 50, ton3: 25, ton2: 20, ton1: 5 } }
+        };
+
+        let selectedCaseType = 'daily';
+        let isSpinning = false;
+
+        const segments = [
+            { icon: '💨', text: "Bo'sh", type: 'empty', val: 0 },
+            { icon: '💎', text: "0.01 TON", type: 'ton1', val: 0.01 },
+            { icon: '💨', text: "Bo'sh", type: 'empty', val: 0 },
+            { icon: '🧸', text: "Ayiqcha", type: 'gift', val: 1 },
+            { icon: '💨', text: "Bo'sh", type: 'empty', val: 0 },
+            { icon: '💎', text: "0.05 TON", type: 'ton2', val: 0.05 },
+            { icon: '💨', text: "Bo'sh", type: 'empty', val: 0 },
+            { icon: '💎', text: "0.25 TON", type: 'ton3', val: 0.25 }
+        ];
+
+        const colors = ["#23233c", "#00d2ff", "#23233c", "#ff0055", "#23233c", "#0066ff", "#23233c", "#ffcc00"];
+        const numSegments = segments.length;
+        const anglePerSegment = 2 * Math.PI / numSegments;
+        let currentRotation = 0;
+
+        const canvas = document.getElementById('wheel');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spinBtn');
+        const resultDiv = document.getElementById('result');
+
+        window.onload = function() {
+            drawWheel();
+            updateUI();
+            setupReferralUI();
+            checkDailyTimer();
+            setInterval(checkDailyTimer, 1000);
+            
+            setTimeout(() => {
+                let splash = document.getElementById('splash-screen');
+                splash.style.opacity = '0';
+                setTimeout(() => splash.style.display = 'none', 500);
+            }, 1200);
+        };
+
+        function updateUI() {
+            document.getElementById('tonBalance').innerText = account.balance.toFixed(3) + " TON";
+            document.getElementById('giftCount').innerText = account.gifts;
+            document.getElementById('profId').innerText = userId;
+            document.getElementById('profName').innerText = userName;
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function redirectToChannel() {
+            if (tg) {
+                tg.openTelegramLink("https://t.me/freedom_gifts_channel");
+            }
+        }
+
+        function checkSubscription() {
+            // Obunani muvaffaqiyatli deb belgilash va oynani yopish
+            localStorage.setItem('is_subscribed_gifts', 'true');
+            closeModal('subscribeModal');
+            resultDiv.innerText = "Rahmat! Endi keysni ochishingiz mumkin. 🎉";
+            resultDiv.style.color = "#00ffcc";
+        }
+
+        function setupReferralUI() {
+            const botUsername = "freedomgifts_bot"; 
+            const link = `https://t.me/${botUsername}?start=ref_${userId}`;
+            document.getElementById('refLink').innerText = link;
+            document.getElementById('refCount').innerText = account.referrals.length;
+
+            const list = document.getElementById('referralsList');
+            if (account.referrals.length > 0) {
+                document.getElementById('noRefText').style.display = 'none';
+                list.innerHTML = '';
+                account.referrals.forEach(ref => {
+                    list.innerHTML += `<div class="ref-user"><span>👤 ${ref.name}</span><span class="bonus">${ref.bonus}</span></div>`;
+                });
+            }
+        }
+
+        function shareReferral() {
+            const link = document.getElementById('refLink').innerText;
+            const text = encodeURIComponent("🧸 Omad barabanini mutlaqo BEPUL aylantiring va TON koinlarini yutib oling! Boshlang'ich imkoniyat tekin 👇");
+            if (tg) {
+                tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${text}`);
+            } else {
+                window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${text}`, '_blank');
+            }
+        }
+
+        function checkDailyTimer() {
+            if (isSpinning) return;
+            const timeLeft = (account.lastDailyClaim + 24 * 60 * 60 * 1000) - Date.now();
+            const status = document.getElementById('daily-status');
+
+            if (timeLeft > 0) {
+                const h = Math.floor(timeLeft / 3600000).toString().padStart(2, '0');
+                const m = Math.floor((timeLeft % 3600000) / 60000).toString().padStart(2, '0');
+                const s = Math.floor((timeLeft % 60000) / 1000).toString().padStart(2, '0');
+                const timeStr = `${h}:${m}:${s}`;
+                
+                status.innerText = timeStr;
+                status.className = "price timer";
+                if (selectedCaseType === 'daily') { spinBtn.disabled = true; spinBtn.innerText = timeStr; }
+            } else {
+                status.innerText = "TEKIN";
+                status.className = "price";
+                if (selectedCaseType === 'daily') { spinBtn.disabled = false; spinBtn.innerText = "OCHISH (TEKIN)"; }
+            }
+        }
+
+        function selectCase(type) {
+            if (isSpinning) return;
+            selectedCaseType = type;
+            document.querySelectorAll('.case-card').forEach(c => c.classList.remove('active'));
+            document.getElementById(`case-${type}`).classList.add('active');
+            resultDiv.innerText = "";
+            
+            if (type === 'daily') { checkDailyTimer(); } 
+            else { spinBtn.disabled = false; spinBtn.innerText = `OCHISH (${casesConfig[type].price.toFixed(2)} TON)`; }
+        }
+
+        function drawWheel() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < numSegments; i++) {
+                ctx.beginPath(); ctx.moveTo(140, 140);
+                ctx.arc(140, 140, 140, i * anglePerSegment, (i + 1) * anglePerSegment);
+                ctx.fillStyle = colors[i]; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = "#121225"; ctx.stroke();
+                ctx.save(); ctx.translate(140, 140); ctx.rotate(i * anglePerSegment + anglePerSegment / 2);
+                ctx.save(); ctx.translate(95, 0); ctx.rotate(Math.PI / 2); ctx.font = "20px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(segments[i].icon, 0, 0); ctx.restore();
+                ctx.textAlign = "right"; ctx.fillStyle = "#fff"; ctx.font = "bold 10px sans-serif"; ctx.fillText(segments[i].text, 75, 4); ctx.restore();
+            }
+            ctx.beginPath(); ctx.arc(140, 140, 15, 0, 2 * Math.PI); ctx.fillStyle = "#fff"; ctx.fill();
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+
+            // 🔔 MAJBURIY OBUNA TEKSHIRUVI (Faqatgina Tekin/Daily keys uchun)
+            if (selectedCaseType === 'daily') {
+                let isSubscribed = localStorage.getItem('is_subscribed_gifts') === 'true';
+                if (!isSubscribed) {
+                    openModal('subscribeModal');
+                    return; // Obuna bo'lmagan bo'lsa kod shu yerda to'xtaydi
+                }
+            }
+
+            const currentCase = casesConfig[selectedCaseType];
+
+            if (selectedCaseType !== 'daily' && account.balance < currentCase.price) {
+                resultDiv.innerText = "Balansda mablag' yetarli emas! ❌"; resultDiv.style.color = "#ff4444"; return;
+            }
+
+            isSpinning = true; spinBtn.disabled = true; resultDiv.innerText = "Baraban aylanmoqda..."; resultDiv.style.color = "#fff";
+
+            if (selectedCaseType !== 'daily') {
+                account.balance -= currentCase.price;
+                localStorage.setItem('case_ton_balance', account.balance); updateUI();
+            } else {
+                account.lastDailyClaim = Date.now(); localStorage.setItem('last_daily_claim', account.lastDailyClaim);
+            }
+
+            let targetIndex; let r = Math.random() * 100; const probs = currentCase.probabilities;
+            if (r < probs.gift) targetIndex = 3; 
+            else if (r < (probs.gift + probs.ton3)) targetIndex = 7; 
+            else if (r < (probs.gift + probs.ton3 + probs.ton2)) targetIndex = 5; 
+            else if (r < (probs.gift + probs.ton3 + probs.ton2 + probs.ton1)) targetIndex = 1; 
+            else { targetIndex = [0, 2, 4, 6][Math.floor(Math.random() * 4)]; } 
+
+            const stopAngle = (numSegments - targetIndex) * anglePerSegment - (anglePerSegment / 2) - (Math.PI / 2);
+            currentRotation = (8 * 2 * Math.PI) + stopAngle;
+            canvas.style.transform = `rotate(${currentRotation}rad)`;
+
+            setTimeout(() => {
+                isSpinning = false; const item = segments[targetIndex];
+                if (item.type === 'empty') { resultDiv.innerText = "Omad kelmadi! 😢"; resultDiv.style.color = "#ff4444"; } 
+                else if (item.type.startsWith('ton')) {
+                    account.balance += item.val; localStorage.setItem('case_ton_balance', account.balance);
+                    resultDiv.innerText = `YUTUQ: +${item.val} TON! 💎`; resultDiv.style.color = "#00ffcc";
+                } else if (item.type === 'gift') {
+                    account.gifts += 1; localStorage.setItem('case_gift_count', account.gifts);
+                    resultDiv.innerText = "YUTUQ: Ayiqcha! 🧸🎉"; resultDiv.style.color = "#ffcc00";
+                }
+                updateUI(); checkDailyTimer();
+                if (selectedCaseType !== 'daily') spinBtn.disabled = false;
+
+                const actualNormAngle = stopAngle % (2 * Math.PI);
+                canvas.style.transition = 'none'; canvas.style.transform = `rotate(${actualNormAngle}rad)`;
+                setTimeout(() => { canvas.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)'; }, 50);
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
