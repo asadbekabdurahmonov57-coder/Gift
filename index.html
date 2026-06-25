@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram Барабан Удачи</title>
-    <!-- 🚀 Telegram WebApp SDK Scripti -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -66,20 +65,17 @@
         .ref-user { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 8px; border-bottom: 1px solid #1e1e38; }
         .ref-user .bonus { color: #00ffcc; }
 
-        /* 🔔 Majburiy obuna modal dizayni */
         .sub-btn { background: #ff0055; color: #fff; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; text-align: center; text-decoration: none; display: block; margin-top: 15px; }
         .check-btn { background: #00ffcc; color: #121225; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; text-align: center; display: block; width: 100%; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <!-- Kirish Ekran (Splash) -->
     <div id="splash-screen">
         <div class="teddy-loader">🧸</div>
         <h3 style="color: #ffcc00; font-family: monospace;">ЗАГРУЗКА...</h3>
     </div>
 
-    <!-- Asosiy Panel -->
     <div class="header-panel">
         <div>💰 Баланс:</div>
         <div class="balance-box" id="tonBalance">0.000 TON</div>
@@ -90,7 +86,6 @@
         <button class="menu-btn" onclick="openModal('profileModal')">👤 Профиль / Реф</button>
     </div>
 
-    <!-- Keyslar bo'limi -->
     <div class="cases-section">
         <h3>🧰 Выберите кейс:</h3>
         <div class="cases-grid">
@@ -117,7 +112,6 @@
         </div>
     </div>
 
-    <!-- Ruletka qismi -->
     <div class="wheel-section">
         <div class="wheel-container">
             <div class="pointer"></div>
@@ -127,7 +121,6 @@
         <div id="result"></div>
     </div>
 
-    <!-- INVENTAR MODAL -->
     <div class="modal" id="inventoryModal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('inventoryModal')">&times;</span>
@@ -142,7 +135,6 @@
         </div>
     </div>
 
-    <!-- PROFIL MODAL -->
     <div class="modal" id="profileModal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('profileModal')">&times;</span>
@@ -165,20 +157,18 @@
         </div>
     </div>
 
-    <!-- 🔔 MAJBURIY OBUNA MODALI -->
     <div class="modal" id="subscribeModal">
         <div class="modal-content" style="text-align: center;">
             <h3 style="color: #ffcc00; border: none;">Внимание! Подписка обязательна 🔔</h3>
             <p style="font-size: 13px; color: #ccc; line-height: 1.6;">
-                Чтобы открыть бесплатный ежедневный кейс, вы должны подписаться на наш спонсорский канал. Там публикуются ценные призы!
+                Чтобы открыть бесплатный ежедневный кейс, вы должны подписаться на наш спонсорский канал.
             </p>
             <a href="https://t.me/freedom_gifts_channel" target="_blank" class="sub-btn" onclick="redirectToChannel()">Подписаться на канал 📢</a>
-            <button class="check-btn" onclick="checkSubscription()">Я подписался(лась)  ✅</button>
+            <button class="check-btn" onclick="checkSubscription()">Я подписался(лась) ✅</button>
         </div>
     </div>
 
     <script>
-        // Telegram API
         let tg = null;
         if (window.Telegram && window.Telegram.WebApp) {
             tg = window.Telegram.WebApp;
@@ -190,33 +180,24 @@
         let userId = tgUser.id;
         let userName = tgUser.first_name;
 
-        // Ma'lumotlarni tozalash versiyasi (Keshni tozalash v3)
-        if (!localStorage.getItem('wheel_final_zero_v3')) {
-            localStorage.setItem('case_ton_balance', '0.000'); 
-            localStorage.setItem('case_gift_count', '0');
-            localStorage.setItem('last_daily_claim', '0');
-            localStorage.setItem('my_referrals', JSON.stringify([]));
-            localStorage.setItem('is_subscribed_gifts', 'false');
-            localStorage.setItem('wheel_final_zero_v3', 'true');
-        }
-
+        // ✅ HAR BIR USER UCHUN MAXSUS KALITLAR BILAN SAQLASH (Xatolik tuzatildi!)
         let account = {
-            balance: parseFloat(localStorage.getItem('case_ton_balance')) || 0.0,
-            gifts: parseInt(localStorage.getItem('case_gift_count')) || 0,
-            lastDailyClaim: parseInt(localStorage.getItem('last_daily_claim')) || 0,
-            referrals: JSON.parse(localStorage.getItem('my_referrals')) || []
+            balance: parseFloat(localStorage.getItem('case_ton_balance_' + userId)) || 0.0,
+            gifts: parseInt(localStorage.getItem('case_gift_count_' + userId)) || 0,
+            lastDailyClaim: parseInt(localStorage.getItem('last_daily_claim_' + userId)) || 0,
+            referrals: JSON.parse(localStorage.getItem('my_referrals_' + userId)) || []
         };
 
-        // Referal tizimi mantiqi
+        // Referal mantiqi
         let startParam = (tg && tg.initDataUnsafe) ? tg.initDataUnsafe.start_param : null;
         if (startParam && startParam.startsWith('ref_')) {
             let inviterId = startParam.replace('ref_', '');
-            if (!localStorage.getItem('referral_bonus_processed') && inviterId !== userId.toString()) {
+            if (!localStorage.getItem('ref_processed_' + userId) && inviterId !== userId.toString()) {
                 account.balance += 0.10; 
                 account.referrals.push({ name: "Друг (ID: " + inviterId + ")", bonus: "+0.10 TON" });
-                localStorage.setItem('case_ton_balance', account.balance);
-                localStorage.setItem('my_referrals', JSON.stringify(account.referrals));
-                localStorage.setItem('referral_bonus_processed', 'true');
+                localStorage.setItem('case_ton_balance_' + userId, account.balance);
+                localStorage.setItem('my_referrals_' + userId, JSON.stringify(account.referrals));
+                localStorage.setItem('ref_processed_' + userId, 'true');
             }
         }
 
@@ -280,7 +261,7 @@
         }
 
         function checkSubscription() {
-            localStorage.setItem('is_subscribed_gifts', 'true');
+            localStorage.setItem('is_subscribed_gifts_' + userId, 'true');
             closeModal('subscribeModal');
             resultDiv.innerText = "Спасибо! Теперь вы можете открыть кейс. 🎉";
             resultDiv.style.color = "#00ffcc";
@@ -307,8 +288,6 @@
             const text = encodeURIComponent("🧸 Крути колесо удачи БЕСПЛАТНО и выигрывай монеты TON! Первая попытка бесплатно 👇");
             if (tg) {
                 tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${text}`);
-            } else {
-                window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${text}`, '_blank');
             }
         }
 
@@ -360,9 +339,8 @@
         function spinWheel() {
             if (isSpinning) return;
 
-            // 🔔 MAJBURIY OBUNA TEKSHIRUVI
             if (selectedCaseType === 'daily') {
-                let isSubscribed = localStorage.getItem('is_subscribed_gifts') === 'true';
+                let isSubscribed = localStorage.getItem('is_subscribed_gifts_' + userId) === 'true';
                 if (!isSubscribed) { openModal('subscribeModal'); return; }
             }
 
@@ -376,9 +354,9 @@
 
             if (selectedCaseType !== 'daily') {
                 account.balance -= currentCase.price;
-                localStorage.setItem('case_ton_balance', account.balance); updateUI();
+                localStorage.setItem('case_ton_balance_' + userId, account.balance); updateUI();
             } else {
-                account.lastDailyClaim = Date.now(); localStorage.setItem('last_daily_claim', account.lastDailyClaim);
+                account.lastDailyClaim = Date.now(); localStorage.setItem('last_daily_claim_' + userId, account.lastDailyClaim);
             }
 
             let targetIndex; let r = Math.random() * 100; const probs = currentCase.probabilities;
@@ -396,10 +374,10 @@
                 isSpinning = false; const item = segments[targetIndex];
                 if (item.type === 'empty') { resultDiv.innerText = "Удача не на вашей стороне! 😢"; resultDiv.style.color = "#ff4444"; } 
                 else if (item.type.startsWith('ton')) {
-                    account.balance += item.val; localStorage.setItem('case_ton_balance', account.balance);
+                    account.balance += item.val; localStorage.setItem('case_ton_balance_' + userId, account.balance);
                     resultDiv.innerText = `ВЫИГРЫШ: +${item.val} TON! 💎`; resultDiv.style.color = "#00ffcc";
                 } else if (item.type === 'gift') {
-                    account.gifts += 1; localStorage.setItem('case_gift_count', account.gifts);
+                    account.gifts += 1; localStorage.setItem('case_gift_count_' + userId, account.gifts);
                     resultDiv.innerText = "ВЫИГРЫШ: Игрушечный Мишка! 🧸🎉"; resultDiv.style.color = "#ffcc00";
                 }
                 updateUI(); checkDailyTimer();
