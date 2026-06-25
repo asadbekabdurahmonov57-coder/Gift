@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Omad Barabani</title>
+    <title>Telegram Барабан Удачи</title>
     <!-- 🚀 Telegram WebApp SDK Scripti -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -76,42 +76,42 @@
     <!-- Kirish Ekran (Splash) -->
     <div id="splash-screen">
         <div class="teddy-loader">🧸</div>
-        <h3 style="color: #ffcc00; font-family: monospace;">YUKLANMOQDA...</h3>
+        <h3 style="color: #ffcc00; font-family: monospace;">ЗАГРУЗКА...</h3>
     </div>
 
     <!-- Asosiy Panel -->
     <div class="header-panel">
-        <div>💰 Balans:</div>
+        <div>💰 Баланс:</div>
         <div class="balance-box" id="tonBalance">0.000 TON</div>
     </div>
 
     <div class="menu-buttons">
-        <button class="menu-btn" onclick="openModal('inventoryModal')">📦 Inventar</button>
-        <button class="menu-btn" onclick="openModal('profileModal')">👤 Profil / Ref</button>
+        <button class="menu-btn" onclick="openModal('inventoryModal')">📦 Инвентарь</button>
+        <button class="menu-btn" onclick="openModal('profileModal')">👤 Профиль / Реф</button>
     </div>
 
     <!-- Keyslar bo'limi -->
     <div class="cases-section">
-        <h3>🧰 Keysni tanlang:</h3>
+        <h3>🧰 Выберите кейс:</h3>
         <div class="cases-grid">
             <div class="case-card active" id="case-daily" onclick="selectCase('daily')">
                 <span class="icon">🎁</span>
-                <span class="name">Kunlik Keys</span>
-                <span class="price" id="daily-status">TEKIN</span>
+                <span class="name">Ежедневный</span>
+                <span class="price" id="daily-status">БЕСПЛАТНО</span>
             </div>
             <div class="case-card" id="case-cheap" onclick="selectCase('cheap')">
                 <span class="icon">📦</span>
-                <span class="name">Arzon Keys</span>
+                <span class="name">Дешевый кейс</span>
                 <span class="price">0.10 TON</span>
             </div>
             <div class="case-card" id="case-medium" onclick="selectCase('medium')">
                 <span class="icon">💼</span>
-                <span class="name">O'rta Keys</span>
+                <span class="name">Средний кейс</span>
                 <span class="price">0.50 TON</span>
             </div>
             <div class="case-card" id="case-premium" onclick="selectCase('premium')">
                 <span class="icon">👑</span>
-                <span class="name">Premium Keys</span>
+                <span class="name">Премиум кейс</span>
                 <span class="price">2.00 TON</span>
             </div>
         </div>
@@ -123,7 +123,7 @@
             <div class="pointer"></div>
             <canvas id="wheel" width="280" height="280"></canvas>
         </div>
-        <button class="spin-btn" id="spinBtn" onclick="spinWheel()">OCHISH (TEKIN)</button>
+        <button class="spin-btn" id="spinBtn" onclick="spinWheel()">ОТКРЫТЬ (БЕСПЛАТНО)</button>
         <div id="result"></div>
     </div>
 
@@ -131,12 +131,12 @@
     <div class="modal" id="inventoryModal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('inventoryModal')">&times;</span>
-            <h3>📦 Mening Inventarim</h3>
+            <h3>📦 Мой Инвентарь</h3>
             <div class="inventory-grid">
                 <div class="inventory-item">
                     <span class="count" id="giftCount">0</span>
                     <span class="icon">🧸</span>
-                    <span class="name">Ayiqchalar</span>
+                    <span class="name">Мишки</span>
                 </div>
             </div>
         </div>
@@ -146,20 +146,20 @@
     <div class="modal" id="profileModal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('profileModal')">&times;</span>
-            <h3>👤 Profil va Referallar</h3>
+            <h3>👤 Профиль и Рефералы</h3>
             <div class="profile-group">
-                <div style="font-size: 13px;">Ism: <span id="profName" style="font-weight: bold; color: #ffcc00;">Mehmon</span></div>
+                <div style="font-size: 13px;">Имя: <span id="profName" style="font-weight: bold; color: #ffcc00;">Гость</span></div>
                 <div style="font-size: 13px;">Telegram ID: <span id="profId" style="color:#00d2ff;">0000000</span></div>
                 <hr style="border: 0; border-top: 1px solid #3a3a6a; margin: 10px 0;">
-                <div style="font-size: 12px; color: #ccc;">Sizning taklif havolangiz:</div>
-                <div class="ref-link-box" id="refLink">Yaratilmoqda...</div>
-                <button class="share-btn" onclick="shareReferral()">Do'stlarni taklif qilish 🚀</button>
+                <div style="font-size: 12px; color: #ccc;">Ваша реферальная ссылка:</div>
+                <div class="ref-link-box" id="refLink">Создается...</div>
+                <button class="share-btn" onclick="shareReferral()">Пригласить друзей 🚀</button>
                 
                 <div style="font-size: 13px; color: #ffcc00; margin-top: 10px; font-weight: bold;">
-                    Taklif qilinganlar (<span id="refCount">0</span>):
+                    Приглашенные (<span id="refCount">0</span>):
                 </div>
                 <div class="referrals-list" id="referralsList">
-                    <div style="color:#aaa; font-size:11px; text-align:center; padding:10px;" id="noRefText">Hozircha hech kim yo'q</div>
+                    <div style="color:#aaa; font-size:11px; text-align:center; padding:10px;" id="noRefText">Пока никого нет</div>
                 </div>
             </div>
         </div>
@@ -168,18 +168,17 @@
     <!-- 🔔 MAJBURIY OBUNA MODALI -->
     <div class="modal" id="subscribeModal">
         <div class="modal-content" style="text-align: center;">
-            <h3 style="color: #ffcc00; border: none;">Diqqat! Obuna majburiy 🔔</h3>
+            <h3 style="color: #ffcc00; border: none;">Внимание! Подписка обязательна 🔔</h3>
             <p style="font-size: 13px; color: #ccc; line-height: 1.6;">
-                Tekin kunlik keysni ochish uchun homiy kanalimizga a'zo bo'lishingiz shart. Kanalda qimmatbaho sovg'alar va yangiliklar e'lon qilib boriladi!
+                Чтобы открыть бесплатный ежедневный кейс, вы должны подписаться на наш спонсорский канал. Там публикуются ценные призы!
             </p>
-            <!-- Soddalashtirilgan va ochiladigan havola -->
-            <a href="https://t.me/freedom_gifts_channel" target="_blank" class="sub-btn" onclick="redirectToChannel()">Kanalga a'zo bo'lish 📢</a>
-            <button class="check-btn" onclick="checkSubscription()">Obunani tekshirish  ✅</button>
+            <a href="https://t.me/freedom_gifts_channel" target="_blank" class="sub-btn" onclick="redirectToChannel()">Подписаться на канал 📢</a>
+            <button class="check-btn" onclick="checkSubscription()">Я подписался(лась)  ✅</button>
         </div>
     </div>
 
     <script>
-        // Telegram API obyekti
+        // Telegram API
         let tg = null;
         if (window.Telegram && window.Telegram.WebApp) {
             tg = window.Telegram.WebApp;
@@ -191,13 +190,13 @@
         let userId = tgUser.id;
         let userName = tgUser.first_name;
 
-        // 🎯 TOZA 0 DAN BOSHLACH
+        // Ma'lumotlarni tozalash versiyasi (Keshni tozalash v3)
         if (!localStorage.getItem('wheel_final_zero_v3')) {
             localStorage.setItem('case_ton_balance', '0.000'); 
             localStorage.setItem('case_gift_count', '0');
             localStorage.setItem('last_daily_claim', '0');
             localStorage.setItem('my_referrals', JSON.stringify([]));
-            localStorage.setItem('is_subscribed_gifts', 'false'); // Obuna holati boshida false
+            localStorage.setItem('is_subscribed_gifts', 'false');
             localStorage.setItem('wheel_final_zero_v3', 'true');
         }
 
@@ -208,13 +207,13 @@
             referrals: JSON.parse(localStorage.getItem('my_referrals')) || []
         };
 
-        // --- Dinamik Referal Tizimi (Har bir user uchun alohida) ---
+        // Referal tizimi mantiqi
         let startParam = (tg && tg.initDataUnsafe) ? tg.initDataUnsafe.start_param : null;
         if (startParam && startParam.startsWith('ref_')) {
             let inviterId = startParam.replace('ref_', '');
             if (!localStorage.getItem('referral_bonus_processed') && inviterId !== userId.toString()) {
                 account.balance += 0.10; 
-                account.referrals.push({ name: "Taklif qilgan do'st (ID: " + inviterId + ")", bonus: "+0.10 TON" });
+                account.referrals.push({ name: "Друг (ID: " + inviterId + ")", bonus: "+0.10 TON" });
                 localStorage.setItem('case_ton_balance', account.balance);
                 localStorage.setItem('my_referrals', JSON.stringify(account.referrals));
                 localStorage.setItem('referral_bonus_processed', 'true');
@@ -232,13 +231,13 @@
         let isSpinning = false;
 
         const segments = [
-            { icon: '💨', text: "Bo'sh", type: 'empty', val: 0 },
+            { icon: '💨', text: "Пусто", type: 'empty', val: 0 },
             { icon: '💎', text: "0.01 TON", type: 'ton1', val: 0.01 },
-            { icon: '💨', text: "Bo'sh", type: 'empty', val: 0 },
-            { icon: '🧸', text: "Ayiqcha", type: 'gift', val: 1 },
-            { icon: '💨', text: "Bo'sh", type: 'empty', val: 0 },
+            { icon: '💨', text: "Пусто", type: 'empty', val: 0 },
+            { icon: '🧸', text: "Мишка", type: 'gift', val: 1 },
+            { icon: '💨', text: "Пусто", type: 'empty', val: 0 },
             { icon: '💎', text: "0.05 TON", type: 'ton2', val: 0.05 },
-            { icon: '💨', text: "Bo'sh", type: 'empty', val: 0 },
+            { icon: '💨', text: "Пусто", type: 'empty', val: 0 },
             { icon: '💎', text: "0.25 TON", type: 'ton3', val: 0.25 }
         ];
 
@@ -277,16 +276,13 @@
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
         function redirectToChannel() {
-            if (tg) {
-                tg.openTelegramLink("https://t.me/freedom_gifts_channel");
-            }
+            if (tg) { tg.openTelegramLink("https://t.me/freedom_gifts_channel"); }
         }
 
         function checkSubscription() {
-            // Obunani muvaffaqiyatli deb belgilash va oynani yopish
             localStorage.setItem('is_subscribed_gifts', 'true');
             closeModal('subscribeModal');
-            resultDiv.innerText = "Rahmat! Endi keysni ochishingiz mumkin. 🎉";
+            resultDiv.innerText = "Спасибо! Теперь вы можете открыть кейс. 🎉";
             resultDiv.style.color = "#00ffcc";
         }
 
@@ -308,7 +304,7 @@
 
         function shareReferral() {
             const link = document.getElementById('refLink').innerText;
-            const text = encodeURIComponent("🧸 Omad barabanini mutlaqo BEPUL aylantiring va TON koinlarini yutib oling! Boshlang'ich imkoniyat tekin 👇");
+            const text = encodeURIComponent("🧸 Крути колесо удачи БЕСПЛАТНО и выигрывай монеты TON! Первая попытка бесплатно 👇");
             if (tg) {
                 tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${text}`);
             } else {
@@ -331,9 +327,9 @@
                 status.className = "price timer";
                 if (selectedCaseType === 'daily') { spinBtn.disabled = true; spinBtn.innerText = timeStr; }
             } else {
-                status.innerText = "TEKIN";
+                status.innerText = "БЕСПЛАТНО";
                 status.className = "price";
-                if (selectedCaseType === 'daily') { spinBtn.disabled = false; spinBtn.innerText = "OCHISH (TEKIN)"; }
+                if (selectedCaseType === 'daily') { spinBtn.disabled = false; spinBtn.innerText = "ОТКРЫТЬ (БЕСПЛАТНО)"; }
             }
         }
 
@@ -345,7 +341,7 @@
             resultDiv.innerText = "";
             
             if (type === 'daily') { checkDailyTimer(); } 
-            else { spinBtn.disabled = false; spinBtn.innerText = `OCHISH (${casesConfig[type].price.toFixed(2)} TON)`; }
+            else { spinBtn.disabled = false; spinBtn.innerText = `ОТКРЫТЬ (${casesConfig[type].price.toFixed(2)} TON)`; }
         }
 
         function drawWheel() {
@@ -364,22 +360,19 @@
         function spinWheel() {
             if (isSpinning) return;
 
-            // 🔔 MAJBURIY OBUNA TEKSHIRUVI (Faqatgina Tekin/Daily keys uchun)
+            // 🔔 MAJBURIY OBUNA TEKSHIRUVI
             if (selectedCaseType === 'daily') {
                 let isSubscribed = localStorage.getItem('is_subscribed_gifts') === 'true';
-                if (!isSubscribed) {
-                    openModal('subscribeModal');
-                    return; // Obuna bo'lmagan bo'lsa kod shu yerda to'xtaydi
-                }
+                if (!isSubscribed) { openModal('subscribeModal'); return; }
             }
 
             const currentCase = casesConfig[selectedCaseType];
 
             if (selectedCaseType !== 'daily' && account.balance < currentCase.price) {
-                resultDiv.innerText = "Balansda mablag' yetarli emas! ❌"; resultDiv.style.color = "#ff4444"; return;
+                resultDiv.innerText = "Недостаточно средств на балансе! ❌"; resultDiv.style.color = "#ff4444"; return;
             }
 
-            isSpinning = true; spinBtn.disabled = true; resultDiv.innerText = "Baraban aylanmoqda..."; resultDiv.style.color = "#fff";
+            isSpinning = true; spinBtn.disabled = true; resultDiv.innerText = "Колесо вращается..."; resultDiv.style.color = "#fff";
 
             if (selectedCaseType !== 'daily') {
                 account.balance -= currentCase.price;
@@ -401,13 +394,13 @@
 
             setTimeout(() => {
                 isSpinning = false; const item = segments[targetIndex];
-                if (item.type === 'empty') { resultDiv.innerText = "Omad kelmadi! 😢"; resultDiv.style.color = "#ff4444"; } 
+                if (item.type === 'empty') { resultDiv.innerText = "Удача не на вашей стороне! 😢"; resultDiv.style.color = "#ff4444"; } 
                 else if (item.type.startsWith('ton')) {
                     account.balance += item.val; localStorage.setItem('case_ton_balance', account.balance);
-                    resultDiv.innerText = `YUTUQ: +${item.val} TON! 💎`; resultDiv.style.color = "#00ffcc";
+                    resultDiv.innerText = `ВЫИГРЫШ: +${item.val} TON! 💎`; resultDiv.style.color = "#00ffcc";
                 } else if (item.type === 'gift') {
                     account.gifts += 1; localStorage.setItem('case_gift_count', account.gifts);
-                    resultDiv.innerText = "YUTUQ: Ayiqcha! 🧸🎉"; resultDiv.style.color = "#ffcc00";
+                    resultDiv.innerText = "ВЫИГРЫШ: Игрушечный Мишка! 🧸🎉"; resultDiv.style.color = "#ffcc00";
                 }
                 updateUI(); checkDailyTimer();
                 if (selectedCaseType !== 'daily') spinBtn.disabled = false;
