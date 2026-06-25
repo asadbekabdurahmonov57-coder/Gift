@@ -180,7 +180,6 @@
         let userId = tgUser.id;
         let userName = tgUser.first_name;
 
-        // ✅ HAR BIR USER UCHUN MAXSUS KALITLAR BILAN SAQLASH (Xatolik tuzatildi!)
         let account = {
             balance: parseFloat(localStorage.getItem('case_ton_balance_' + userId)) || 0.0,
             gifts: parseInt(localStorage.getItem('case_gift_count_' + userId)) || 0,
@@ -188,7 +187,6 @@
             referrals: JSON.parse(localStorage.getItem('my_referrals_' + userId)) || []
         };
 
-        // Referal mantiqi
         let startParam = (tg && tg.initDataUnsafe) ? tg.initDataUnsafe.start_param : null;
         if (startParam && startParam.startsWith('ref_')) {
             let inviterId = startParam.replace('ref_', '');
@@ -201,11 +199,12 @@
             }
         }
 
+        // 📊 EHTIMOLLIKLAR YANGILANDI: "gift" hammasida 0% qilindi! Qolgan foizlar Pusto va TON'ga bo'lindi.
         const casesConfig = {
-            daily: { price: 0, probabilities: { gift: 25, ton3: 5, ton2: 10, ton1: 30 } },
-            cheap: { price: 0.1, probabilities: { gift: 10, ton3: 5, ton2: 15, ton1: 40 } },
-            medium: { price: 0.5, probabilities: { gift: 30, ton3: 15, ton2: 25, ton1: 20 } },
-            premium: { price: 2.0, probabilities: { gift: 50, ton3: 25, ton2: 20, ton1: 5 } }
+            daily: { price: 0, probabilities: { gift: 0, ton3: 10, ton2: 20, ton1: 30 } },   // Qolgan 40% Pusto (bo'sh)
+            cheap: { price: 0.1, probabilities: { gift: 0, ton3: 5, ton2: 15, ton1: 40 } },   // Qolgan 40% Pusto
+            medium: { price: 0.5, probabilities: { gift: 0, ton3: 20, ton2: 30, ton1: 30 } }, // Qolgan 20% Pusto
+            premium: { price: 2.0, probabilities: { gift: 0, ton3: 40, ton2: 40, ton1: 15 } } // Qolgan 5% Pusto
         };
 
         let selectedCaseType = 'daily';
@@ -360,11 +359,15 @@
             }
 
             let targetIndex; let r = Math.random() * 100; const probs = currentCase.probabilities;
-            if (r < probs.gift) targetIndex = 3; 
-            else if (r < (probs.gift + probs.ton3)) targetIndex = 7; 
-            else if (r < (probs.gift + probs.ton3 + probs.ton2)) targetIndex = 5; 
-            else if (r < (probs.gift + probs.ton3 + probs.ton2 + probs.ton1)) targetIndex = 1; 
-            else { targetIndex = [0, 2, 4, 6][Math.floor(Math.random() * 4)]; } 
+            
+            // 🛠️ XORAZM / AYIQCHA TUSHISHINI YO'QOTISH MANTIQLI HISOBI (Ayiqcha indexi: 3)
+            if (r < probs.ton3) targetIndex = 7; 
+            else if (r < (probs.ton3 + probs.ton2)) targetIndex = 5; 
+            else if (r < (probs.ton3 + probs.ton2 + probs.ton1)) targetIndex = 1; 
+            else { 
+                // Agar TON'lar tushmasa, faqat Bo'sh (Pusto) segmentlaridan birini tanlaydi [0, 2, 4, 6]
+                targetIndex = [0, 2, 4, 6][Math.floor(Math.random() * 4)]; 
+            } 
 
             const stopAngle = (numSegments - targetIndex) * anglePerSegment - (anglePerSegment / 2) - (Math.PI / 2);
             currentRotation = (8 * 2 * Math.PI) + stopAngle;
