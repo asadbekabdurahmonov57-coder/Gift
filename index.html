@@ -17,6 +17,7 @@
             min-height: 100vh;
             color: white;
             overflow: hidden;
+            position: relative;
         }
 
         /* Top-right balance box */
@@ -71,7 +72,7 @@
             z-index: 10;
         }
 
-        /* Cho'g'lar (Sparks/Embers) animatsiyasi uchun konteyner */
+        /* Embers container */
         .embers-container {
             position: absolute;
             top: 0;
@@ -80,7 +81,7 @@
             height: 100%;
             pointer-events: none;
             overflow: hidden;
-            z-index: 1; /* Baraban ichida, elementlar ostida */
+            z-index: 1;
         }
 
         .ember {
@@ -200,7 +201,7 @@
             z-index: 20;
         }
 
-        .roll-btn:hover {
+        .roll-btn:hover:not(:disabled) {
             transform: scale(1.03);
             background: linear-gradient(135deg, #2563eb, #1e40af);
         }
@@ -209,6 +210,7 @@
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
+            background: #4b5563;
         }
 
         #result {
@@ -219,6 +221,108 @@
             height: 30px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
             z-index: 20;
+        }
+
+        /* Profile icon in bottom-right corner */
+        .profile-icon-btn {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            background: #1e1e28;
+            border: 2px solid #2a2a3b;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            transition: 0.2s;
+            z-index: 30;
+        }
+
+        .profile-icon-btn:hover {
+            transform: scale(1.08);
+            border-color: #3b82f6;
+        }
+
+        .profile-icon-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: #00e5ff;
+        }
+
+        /* Modal styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: #1a1a24;
+            border: 2px solid #2a2a3b;
+            padding: 25px 30px;
+            border-radius: 16px;
+            width: 320px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            position: relative;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: #fff;
+            font-size: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #2a2a3b;
+            padding-bottom: 10px;
+        }
+
+        .modal-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            font-size: 16px;
+            color: #d1d5db;
+        }
+
+        .modal-info span {
+            color: #00e5ff;
+            font-weight: bold;
+        }
+
+        .close-modal-btn {
+            margin-top: 20px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .close-modal-btn:hover {
+            background: #2563eb;
         }
     </style>
 </head>
@@ -233,7 +337,6 @@
     <div class="header">Sweet Gifty Case</div>
 
     <div class="case-container" id="container">
-        <!-- Cho'g'lar chiqib turadigan fon qismi -->
         <div class="embers-container" id="embers"></div>
         <div class="pointer"></div>
         <div class="case-track" id="track"></div>
@@ -242,9 +345,41 @@
     <button class="roll-btn" id="rollBtn" onclick="startRoll()">ROLL</button>
     <div id="result"></div>
 
+    <!-- Bottom-right Profile Icon Button -->
+    <div class="profile-icon-btn" onclick="openProfileModal()" title="Profile">
+        <svg viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+        </svg>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal-overlay" id="profileModal" onclick="closeProfileModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3>User Profile</h3>
+            <div class="modal-info">
+                <span>Total Balance:</span>
+                <span id="modalBalance">0.0 USDT</span>
+            </div>
+            <div class="modal-info">
+                <span>Next Free Open:</span>
+                <span id="modalCooldown" style="font-size: 14px;">Available Now</span>
+            </div>
+            <button class="close-modal-btn" onclick="closeProfileModal()">Close</button>
+        </div>
+    </div>
+
     <script>
-        let userBalance = 0.0;
+        let userBalance = parseFloat(localStorage.getItem('userBalance')) || 0.0;
         const balanceSpan = document.getElementById('balance');
+        const modalBalance = document.getElementById('modalBalance');
+        const modalCooldown = document.getElementById('modalCooldown');
+
+        function updateBalanceDisplay() {
+            balanceSpan.innerText = userBalance;
+            modalBalance.innerText = userBalance + " USDT";
+            localStorage.setItem('userBalance', userBalance);
+        }
+        updateBalanceDisplay();
 
         const giftTemplates = [
             { name: "USDT", amount: 0.5, img: "Usdt.png" },
@@ -260,19 +395,18 @@
         const container = document.getElementById('container');
         const embersContainer = document.getElementById('embers');
 
-        // Mayda cho'g'larni yaratish funksiyasi
+        // Embers generation
         function createEmbers() {
             embersContainer.innerHTML = '';
-            const emberCount = 25; // Cho'g'lar soni
+            const emberCount = 25;
             for (let i = 0; i < emberCount; i++) {
                 const ember = document.createElement('div');
                 ember.className = 'ember';
-                
-                const size = Math.random() * 4 + 2; // 2px dan 6px gacha kattqlik
-                const leftPos = Math.random() * 100; // Eni bo'ylab tasodifiy joylashuv
-                const animDuration = Math.random() * 2 + 1.5; // 1.5s dan 3.5s gacha tezlik
-                const animDelay = Math.random() * 3; // Har xil vaqtda boshlanishi
-                const randX = (Math.random() - 0.5) * 40 + 'px'; // Biroq yonboshga tebranishi
+                const size = Math.random() * 4 + 2;
+                const leftPos = Math.random() * 100;
+                const animDuration = Math.random() * 2 + 1.5;
+                const animDelay = Math.random() * 3;
+                const randX = (Math.random() - 0.5) * 40 + 'px';
 
                 ember.style.width = `${size}px`;
                 ember.style.height = `${size}px`;
@@ -284,7 +418,6 @@
                 embersContainer.appendChild(ember);
             }
         }
-
         createEmbers();
 
         const itemWidth = 136; 
@@ -297,7 +430,6 @@
             itemsData = [];
             for (let i = 0; i < totalItems; i++) {
                 let selectedItem;
-
                 if (i === targetIndex) {
                     selectedItem = Math.random() < 0.5 ? giftTemplates[0] : giftTemplates[1];
                 } else {
@@ -309,7 +441,6 @@
                         selectedItem = Math.random() < 0.5 ? giftTemplates[0] : giftTemplates[1];
                     }
                 }
-
                 itemsData.push(selectedItem);
 
                 const div = document.createElement('div');
@@ -326,10 +457,58 @@
         buildTrack();
         track.style.transform = `translateX(0px)`;
 
+        // Cooldown (24 hours) logic
+        const COOLDOWN_TIME = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+        function checkCooldown() {
+            const lastOpenTime = parseInt(localStorage.getItem('lastOpenTime')) || 0;
+            const now = Date.now();
+            const elapsed = now - lastOpenTime;
+
+            if (elapsed < COOLDOWN_TIME) {
+                const remaining = COOLDOWN_TIME - elapsed;
+                startTimer(remaining);
+                return true;
+            } else {
+                rollBtn.disabled = false;
+                rollBtn.innerText = "ROLL";
+                modalCooldown.innerText = "Available Now";
+                return false;
+            }
+        }
+
+        let timerInterval = null;
+        function startTimer(duration) {
+            rollBtn.disabled = true;
+            let timeLeft = duration;
+
+            if (timerInterval) clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                timeLeft -= 1000;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    rollBtn.disabled = false;
+                    rollBtn.innerText = "ROLL";
+                    modalCooldown.innerText = "Available Now";
+                } else {
+                    const hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
+                    const minutes = Math.floor((timeLeft / (1000 * 60)) % 60);
+                    const seconds = Math.floor((timeLeft / 1000) % 60);
+
+                    const timeStr = `${hours}h ${minutes}m ${seconds}s`;
+                    rollBtn.innerText = `WAIT ${timeStr}`;
+                    modalCooldown.innerText = timeStr;
+                }
+            }, 1000);
+        }
+
+        checkCooldown();
+
         let isRolling = false;
 
         function startRoll() {
-            if (isRolling) return;
+            if (isRolling || checkCooldown()) return;
             isRolling = true;
             rollBtn.disabled = true;
             resultDiv.innerText = "";
@@ -347,18 +526,32 @@
 
                 setTimeout(() => {
                     isRolling = false;
-                    rollBtn.disabled = false;
                     
+                    // Set cooldown
+                    localStorage.setItem('lastOpenTime', Date.now());
+                    checkCooldown();
+
                     const winningItem = itemsData[targetIndex];
 
                     if (winningItem.amount > 0) {
                         userBalance = parseFloat((userBalance + winningItem.amount).toFixed(1));
-                        balanceSpan.innerText = userBalance;
+                        updateBalanceDisplay();
                         resultDiv.innerText = `Congratulations! You won: ${winningItem.name} (+${winningItem.amount})`;
+                    } else {
+                        resultDiv.innerText = `Too bad, it's a gift! Try again later.`;
                     }
                 }, 4050);
 
             }, 50);
+        }
+
+        // Modal functions
+        function openProfileModal() {
+            document.getElementById('profileModal').classList.add('active');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.remove('active');
         }
     </script>
 </body>
