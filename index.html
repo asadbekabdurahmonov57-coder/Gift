@@ -1,206 +1,305 @@
 <!DOCTYPE html>
-<html lang="uz" class="dark">
+<html lang="uz">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cloud Code & Text Clipboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { mono: ['Fira Code', 'Consolas', 'Monaco', 'monospace'] }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GiftNice - Sweet Gifty Case</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #121216;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: white;
+            overflow: hidden;
         }
-      }
-    }
-  </script>
+
+        /* O'ng yuqori burchakdagi balans */
+        .balance-box {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #1e1e28;
+            border: 2px solid #2a2a3b;
+            padding: 10px 18px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .balance-box img {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
+        }
+
+        .balance-box span {
+            color: #00e5ff;
+        }
+
+        .header {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .case-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 160px;
+            background: #1a1a24;
+            border-top: 2px solid #2a2a3b;
+            border-bottom: 2px solid #2a2a3b;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        .pointer {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #3b82f6;
+            z-index: 10;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px #3b82f6;
+        }
+
+        .pointer::before, .pointer::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+        }
+        .pointer::before {
+            top: 0;
+            border-top: 10px solid #3b82f6;
+        }
+        .pointer::after {
+            bottom: 0;
+            border-bottom: 10px solid #3b82f6;
+        }
+
+        .case-track {
+            display: flex;
+            position: absolute;
+            left: 0;
+            will-change: transform;
+        }
+
+        .case-item {
+            min-width: 120px;
+            height: 130px;
+            background: #232333;
+            border: 2px solid #32324a;
+            border-radius: 12px;
+            margin: 0 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .case-item img {
+            width: 52px;
+            height: 52px;
+            object-fit: contain;
+            margin-bottom: 6px;
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
+        }
+
+        .case-item .name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #d1d5db;
+        }
+
+        .case-item .value {
+            font-size: 12px;
+            color: #00e5ff;
+            margin-top: 2px;
+            font-weight: bold;
+        }
+
+        .roll-btn {
+            margin-top: 30px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 14px 45px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            transition: 0.2s;
+            text-transform: uppercase;
+        }
+
+        .roll-btn:hover {
+            transform: scale(1.03);
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+        }
+
+        .roll-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #fbbf24;
+            height: 30px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col font-sans">
+<body>
 
-  <header class="border-b border-gray-800 bg-gray-950 py-4 px-6 shadow-md">
-    <div class="max-w-6xl mx-auto flex justify-between items-center">
-      <h1 class="text-xl font-bold text-blue-400 flex items-center gap-2">
-        <i class="fa-solid fa-cloud-arrow-up"></i> Live Cloud Clipboard
-      </h1>
-      <span class="text-xs bg-green-900/60 text-green-400 border border-green-700 py-1 px-3 rounded-full flex items-center gap-1">
-        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> Online Sync
-      </span>
+    <!-- O'ng yuqori burchakdagi balans (Olmos rasmi ham yonida turibdi deb faraz qilamiz, yoki xohlasangiz uni ham o'zgartirishingiz mumkin) -->
+    <div class="balance-box">
+        <img src="olmos.png" alt="Olmos" onerror="this.src='https://t.me/i/emoji/d/5472251105941018442.png'">
+        <span id="balance">0.0</span>
     </div>
-  </header>
 
-  <main class="max-w-6xl mx-auto w-full p-4 md:p-6 flex-grow flex flex-col gap-6">
+    <div class="header">Sweet Gifty Case</div>
 
-    <!-- Yangi matn tashlash -->
-    <section class="bg-gray-800 border border-gray-700 rounded-xl p-4 md:p-6 shadow-lg">
-      <h2 class="text-lg font-semibold mb-3 text-gray-200">Matn yoki Kod Tashlash</h2>
-      
-      <div class="mb-4">
-        <input 
-          type="text" 
-          id="snippetTitle" 
-          placeholder="Sarlavha (ixtiyoriy, masalan: Python kodi)..." 
-          class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500 mb-3"
-        >
-        <textarea 
-          id="snippetContent" 
-          rows="5" 
-          placeholder="Bu yerga matn yoki kodni joylang..." 
-          class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm font-mono focus:outline-none focus:border-blue-500 text-gray-100 placeholder-gray-500 resize-y"
-        ></textarea>
-      </div>
+    <div class="case-container" id="container">
+        <div class="pointer"></div>
+        <div class="case-track" id="track"></div>
+    </div>
 
-      <div class="flex justify-end gap-3">
-        <button onclick="clearInput()" class="px-4 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg text-gray-300 transition-all">
-          Tozalash
-        </button>
-        <button id="saveBtn" onclick="saveSnippet()" class="px-5 py-2 text-sm bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-all flex items-center gap-2 shadow-md">
-          <i class="fa-solid fa-paper-plane"></i> Bulutga Saqlash
-        </button>
-      </div>
-    </section>
+    <button class="roll-btn" id="rollBtn" onclick="startRoll()">ROLL</button>
+    <div id="result"></div>
 
-    <!-- Saqlangan matnlar -->
-    <section class="flex flex-col gap-4">
-      <div class="flex justify-between items-center">
-        <h2 class="text-lg font-semibold text-gray-200">Bulutdagi Matnlar</h2>
-        <span id="loadingStatus" class="text-xs text-gray-400">Yuklanmoqda...</span>
-      </div>
+    <script>
+        let userBalance = 0.0;
+        const balanceSpan = document.getElementById('balance');
 
-      <div id="snippetsContainer" class="flex flex-col gap-4">
-        <!-- Bulutdan kelgan ma'lumotlar shu yerda chiqadi -->
-      </div>
-    </section>
+        // index.html bilan bir papkada turgan lokal fayllarga moslashtirildi
+        const giftTemplates = [
+            { name: "💎 Olmos", amount: 0.5, img: "olmos.png" },
+            { name: "💎 Olmos", amount: 0.1, img: "olmos.png" },
+            { name: "Champagne", amount: 0, img: "champagne.png" },
+            { name: "Gift Box", amount: 0, img: "giftbox.png" },
+            { name: "Ayiq", amount: 0, img: "Ayiq.png" } // Bear / Ayiq rasmi ulandi
+        ];
 
-  </main>
+        const track = document.getElementById('track');
+        const rollBtn = document.getElementById('rollBtn');
+        const resultDiv = document.getElementById('result');
+        const container = document.getElementById('container');
 
-  <!-- Firebase SDK Modules -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        const itemWidth = 136; 
+        const totalItems = 70;  
+        let itemsData = [];
 
-    // Firebase Sozlamalari (Bepul tayyor test ma'lumotlar bazasi)
-    const firebaseConfig = {
-      databaseURL: "https://clipboard-sync-default-rtdb.firebaseio.com"
-    };
+        function buildTrack() {
+            track.innerHTML = '';
+            itemsData = [];
+            for (let i = 0; i < totalItems; i++) {
+                let selectedItem;
+                let rand = Math.random();
+                if (rand < 0.65) { 
+                    selectedItem = Math.random() < 0.5 ? giftTemplates[0] : giftTemplates[1];
+                } else {
+                    const otherItems = giftTemplates.slice(2);
+                    selectedItem = otherItems[Math.floor(Math.random() * otherItems.length)];
+                }
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const snippetsRef = ref(db, 'snippets');
+                itemsData.push(selectedItem);
 
-    // Realtime ko'rsatish (Har safar ma'lumot o'zgarganda avto yangilanadi)
-    onValue(snippetsRef, (snapshot) => {
-      const container = document.getElementById('snippetsContainer');
-      document.getElementById('loadingStatus').innerText = "Jonli sinxronlangan";
-      container.innerHTML = '';
+                const div = document.createElement('div');
+                div.className = 'case-item';
+                div.innerHTML = `
+                    <img src="${selectedItem.img}" alt="${selectedItem.name}">
+                    <div class="name">${selectedItem.name}</div>
+                    <div class="value">${selectedItem.amount > 0 ? '+' + selectedItem.amount : ''}</div>
+                `;
+                track.appendChild(div);
+            }
+        }
 
-      const data = snapshot.val();
-      if (!data) {
-        container.innerHTML = `
-          <div class="text-center py-10 bg-gray-800/40 rounded-xl border border-dashed border-gray-700 text-gray-400">
-            Bulutda hozircha matn yo'q. Telefondan yoki kompyuterdan matn tashlang!
-          </div>
-        `;
-        return;
-      }
+        buildTrack();
+        track.style.transform = `translateX(0px)`;
 
-      // Kalitlarni massivga aylantirib, eng yangilarini tepaga chiqarish
-      const items = Object.entries(data).reverse();
+        let isRolling = false;
 
-      items.forEach(([key, item]) => {
-        const card = document.createElement('div');
-        card.className = "bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-md";
+        function startRoll() {
+            if (isRolling) return;
+            isRolling = true;
+            rollBtn.disabled = true;
+            resultDiv.innerText = "";
 
-        card.innerHTML = `
-          <div class="bg-gray-850 px-4 py-3 border-b border-gray-700 flex justify-between items-center bg-gray-900/50">
-            <span class="font-medium text-sm text-blue-300 truncate max-w-[70%]">
-              ${escapeHtml(item.title || 'Sarlavhasiz matn')}
-            </span>
-            <div class="flex items-center gap-2">
-              <button 
-                onclick="copyText('${key}', this)" 
-                class="px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white text-xs rounded-md transition-all flex items-center gap-1 font-medium shadow">
-                <i class="fa-regular fa-copy"></i> Nusxalash
-              </button>
-              <button 
-                onclick="deleteSnippet('${key}')" 
-                class="p-1.5 text-gray-400 hover:text-red-400 rounded-md transition-colors">
-                <i class="fa-solid fa-trash-can text-sm"></i>
-              </button>
-            </div>
-          </div>
-          <div class="p-4 bg-gray-950 overflow-x-auto">
-            <pre class="font-mono text-xs md:text-sm text-green-400 whitespace-pre leading-relaxed"><code id="code-${key}">${escapeHtml(item.content)}</code></pre>
-          </div>
-        `;
+            track.style.transition = 'none';
+            track.style.transform = `translateX(0px)`;
+            buildTrack(); 
 
-        container.appendChild(card);
-      });
-    });
+            setTimeout(() => {
+                const containerWidth = container.offsetWidth;
+                const targetIndex = 50;
+                const exactCenterOffset = (targetIndex * itemWidth) - (containerWidth / 2) + (itemWidth / 2);
+                
+                const randomShift = (Math.random() - 0.5) * 120;
+                const roughStopPosition = exactCenterOffset + randomShift;
 
-    // Saqlash funksiyasi
-    window.saveSnippet = function() {
-      const titleInput = document.getElementById('snippetTitle');
-      const contentInput = document.getElementById('snippetContent');
+                track.style.transition = 'transform 4s cubic-bezier(0.15, 0.85, 0.2, 1)';
+                track.style.transform = `translateX(${-roughStopPosition}px)`;
 
-      const title = titleInput.value.trim();
-      const content = contentInput.value;
+                setTimeout(() => {
+                    const currentPos = roughStopPosition;
+                    let landedIndex = Math.round((currentPos + (containerWidth / 2) - (itemWidth / 2)) / itemWidth);
+                    
+                    if (landedIndex < 0) landedIndex = 0;
+                    if (landedIndex >= totalItems) landedIndex = totalItems - 1;
 
-      if (!content.trim()) {
-        alert("Matn yoki kod kiriting!");
-        return;
-      }
+                    const correctedX = -((landedIndex * itemWidth) - (containerWidth / 2) + (itemWidth / 2));
 
-      push(snippetsRef, {
-        title: title,
-        content: content,
-        timestamp: Date.now()
-      }).then(() => {
-        titleInput.value = '';
-        contentInput.value = '';
-      });
-    };
+                    track.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+                    track.style.transform = `translateX(${correctedX}px)`;
 
-    // Nusxalash funksiyasi
-    window.copyText = function(key, btn) {
-      const codeElement = document.getElementById(`code-${key}`);
-      const textToCopy = codeElement.innerText;
+                    setTimeout(() => {
+                        isRolling = false;
+                        rollBtn.disabled = false;
+                        
+                        const winningItem = itemsData[landedIndex];
 
-      navigator.clipboard.writeText(textToCopy).then(() => {
-        const originalHTML = btn.innerHTML;
-        btn.innerHTML = `<i class="fa-solid fa-check"></i> Nusxalandi!`;
-        btn.classList.remove('bg-green-600', 'hover:bg-green-500');
-        btn.classList.add('bg-blue-600');
+                        if (winningItem.amount > 0) {
+                            userBalance = parseFloat((userBalance + winningItem.amount).toFixed(1));
+                            balanceSpan.innerText = userBalance;
+                            resultDiv.innerText = `Tabriklaymiz! Siz yutdingiz: ${winningItem.name} (+${winningItem.amount})`;
+                        } else {
+                            resultDiv.innerText = `Afsus, sovg'a chiqdi! Yana urinib ko'ring.`;
+                        }
+                    }, 650);
 
-        setTimeout(() => {
-          btn.innerHTML = originalHTML;
-          btn.classList.remove('bg-blue-600');
-          btn.classList.add('bg-green-600', 'hover:bg-green-500');
-        }, 2000);
-      });
-    };
+                }, 4050);
 
-    // O'chirish funksiyasi
-    window.deleteSnippet = function(key) {
-      if (confirm("O'chirilsinmi?")) {
-        remove(ref(db, `snippets/${key}`));
-      }
-    };
-
-    window.clearInput = function() {
-      document.getElementById('snippetTitle').value = '';
-      document.getElementById('snippetContent').value = '';
-    };
-
-    function escapeHtml(str) {
-      return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-  </script>
+            }, 50);
+        }
+    </script>
 </body>
 </html>
