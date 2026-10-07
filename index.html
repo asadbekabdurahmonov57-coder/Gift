@@ -199,7 +199,6 @@
         let userBalance = 0.0;
         const balanceSpan = document.getElementById('balance');
 
-        // USDT and other gifts configuration (podarka.png ulandi)
         const giftTemplates = [
             { name: "USDT", amount: 0.5, img: "Usdt.png" },
             { name: "USDT", amount: 0.1, img: "Usdt.png" },
@@ -216,18 +215,27 @@
         const itemWidth = 136; 
         const totalItems = 70;  
         let itemsData = [];
+        const targetIndex = 50; // To'xtaydigan aniq indeks
 
         function buildTrack() {
             track.innerHTML = '';
             itemsData = [];
             for (let i = 0; i < totalItems; i++) {
                 let selectedItem;
-                let rand = Math.random();
-                if (rand < 0.65) { 
+
+                if (i === targetIndex) {
+                    // 50-chi element DOIM USDT chiqishi uchun majburlab qo'yiladi
                     selectedItem = Math.random() < 0.5 ? giftTemplates[0] : giftTemplates[1];
                 } else {
-                    const otherItems = giftTemplates.slice(2);
-                    selectedItem = otherItems[Math.floor(Math.random() * otherItems.length)];
+                    // Qolgan joylarda podarka, shampan va ayiqlar ko'proq chiqadi (80% ehtimollik)
+                    let rand = Math.random();
+                    if (rand < 0.80) {
+                        const otherItems = giftTemplates.slice(2); // Shampan, Gift Box, Bear
+                        selectedItem = otherItems[Math.floor(Math.random() * otherItems.length)];
+                    } else {
+                        // Qolgan qismida kamroq USDT ko'rinadi
+                        selectedItem = Math.random() < 0.5 ? giftTemplates[0] : giftTemplates[1];
+                    }
                 }
 
                 itemsData.push(selectedItem);
@@ -260,42 +268,23 @@
 
             setTimeout(() => {
                 const containerWidth = container.offsetWidth;
-                const targetIndex = 50;
+                // Aniq 50-chi element (USDT) markazga kelib to'xtashi uchun hisob-kitob
                 const exactCenterOffset = (targetIndex * itemWidth) - (containerWidth / 2) + (itemWidth / 2);
-                
-                const randomShift = (Math.random() - 0.5) * 120;
-                const roughStopPosition = exactCenterOffset + randomShift;
 
                 track.style.transition = 'transform 4s cubic-bezier(0.15, 0.85, 0.2, 1)';
-                track.style.transform = `translateX(${-roughStopPosition}px)`;
+                track.style.transform = `translateX(${-exactCenterOffset}px)`;
 
                 setTimeout(() => {
-                    const currentPos = roughStopPosition;
-                    let landedIndex = Math.round((currentPos + (containerWidth / 2) - (itemWidth / 2)) / itemWidth);
+                    isRolling = false;
+                    rollBtn.disabled = false;
                     
-                    if (landedIndex < 0) landedIndex = 0;
-                    if (landedIndex >= totalItems) landedIndex = totalItems - 1;
+                    const winningItem = itemsData[targetIndex];
 
-                    const correctedX = -((landedIndex * itemWidth) - (containerWidth / 2) + (itemWidth / 2));
-
-                    track.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
-                    track.style.transform = `translateX(${correctedX}px)`;
-
-                    setTimeout(() => {
-                        isRolling = false;
-                        rollBtn.disabled = false;
-                        
-                        const winningItem = itemsData[landedIndex];
-
-                        if (winningItem.amount > 0) {
-                            userBalance = parseFloat((userBalance + winningItem.amount).toFixed(1));
-                            balanceSpan.innerText = userBalance;
-                            resultDiv.innerText = `Congratulations! You won: ${winningItem.name} (+${winningItem.amount})`;
-                        } else {
-                            resultDiv.innerText = `Too bad, it's a gift! Try again.`;
-                        }
-                    }, 650);
-
+                    if (winningItem.amount > 0) {
+                        userBalance = parseFloat((userBalance + winningItem.amount).toFixed(1));
+                        balanceSpan.innerText = userBalance;
+                        resultDiv.innerText = `Congratulations! You won: ${winningItem.name} (+${winningItem.amount})`;
+                    }
                 }, 4050);
 
             }, 50);
