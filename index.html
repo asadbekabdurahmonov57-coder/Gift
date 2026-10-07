@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,7 +19,7 @@
             overflow: hidden;
         }
 
-        /* O'ng yuqori burchakdagi balans */
+        /* Top-right balance box */
         .balance-box {
             position: absolute;
             top: 20px;
@@ -179,9 +179,9 @@
 </head>
 <body>
 
-    <!-- O'ng yuqori burchakdagi balans (Olmos rasmi ham yonida turibdi deb faraz qilamiz, yoki xohlasangiz uni ham o'zgartirishingiz mumkin) -->
+    <!-- Top-right balance box -->
     <div class="balance-box">
-        <img src="olmos.png" alt="Olmos" onerror="this.src='https://t.me/i/emoji/d/5472251105941018442.png'">
+        <img src="Usdt.png" alt="USDT" onerror="this.src='https://t.me/i/emoji/d/5472251105941018442.png'">
         <span id="balance">0.0</span>
     </div>
 
@@ -199,13 +199,13 @@
         let userBalance = 0.0;
         const balanceSpan = document.getElementById('balance');
 
-        // index.html bilan bir papkada turgan lokal fayllarga moslashtirildi
+        // USDT and other gifts configuration
         const giftTemplates = [
-            { name: "💎 Olmos", amount: 0.5, img: "olmos.png" },
-            { name: "💎 Olmos", amount: 0.1, img: "olmos.png" },
+            { name: "USDT", amount: 0.5, img: "Usdt.png" },
+            { name: "USDT", amount: 0.1, img: "Usdt.png" },
             { name: "Champagne", amount: 0, img: "champagne.png" },
             { name: "Gift Box", amount: 0, img: "giftbox.png" },
-            { name: "Ayiq", amount: 0, img: "Ayiq.png" } // Bear / Ayiq rasmi ulandi
+            { name: "Bear", amount: 0, img: "Ayiq.png" }
         ];
 
         const track = document.getElementById('track');
@@ -290,9 +290,9 @@
                         if (winningItem.amount > 0) {
                             userBalance = parseFloat((userBalance + winningItem.amount).toFixed(1));
                             balanceSpan.innerText = userBalance;
-                            resultDiv.innerText = `Tabriklaymiz! Siz yutdingiz: ${winningItem.name} (+${winningItem.amount})`;
+                            resultDiv.innerText = `Congratulations! You won: ${winningItem.name} (+${winningItem.amount})`;
                         } else {
-                            resultDiv.innerText = `Afsus, sovg'a chiqdi! Yana urinib ko'ring.`;
+                            resultDiv.innerText = `Too bad, it's a gift! Try again.`;
                         }
                     }, 650);
 
